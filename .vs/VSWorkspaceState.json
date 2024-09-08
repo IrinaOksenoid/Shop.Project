@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Shop.Admin",
+    "\\Shop.Admin\\models",
+    "\\Shop.Admin\\public",
+    "\\Shop.Admin\\public\\img",
+    "\\Shop.Admin\\views",
+    "\\Shop.Admin\\views\\product",
+    "\\Shop.API",
+    "\\Shop.API\\src",
+    "\\Shop.API\\src\\api"
+  ],
+  "SelectedNode": "\\Shop.Admin\\views\\product\\product.ejs",
+  "PreviewInSolutionExplorer": false
+}

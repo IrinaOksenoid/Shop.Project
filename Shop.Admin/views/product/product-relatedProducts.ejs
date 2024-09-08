@@ -1,0 +1,22 @@
+
+<div class="related-product">
+    <div>
+        <strong>
+            <%= relatedProduct.title %>
+        </strong>
+        <div>
+            <%= relatedProduct.description %>
+        </div>
+        <div>
+            Price: <%= relatedProduct.price %>
+        </div>
+    </div>
+
+    <div class="remove-mark">
+        <label for="related-<%= relatedProduct.id %>">Mark to remove</label>
+        <input type="checkbox" id="related-<%= relatedProduct.id %>" value="<%= relatedProduct.id %>" name="relatedProductsToRemove">
+    </div>
+</div>
+
+    
+

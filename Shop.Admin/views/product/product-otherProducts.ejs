@@ -1,0 +1,18 @@
+<div class="other-product">
+    <div>
+        <strong>
+            <%= otherProduct.title %>
+        </strong>
+        <div>
+            <%= otherProduct.description %>
+        </div>
+        <div>
+            Price: <%= otherProduct.price %>
+        </div>
+    </div>
+
+    <div class="add-mark">
+        <label for="other-<%= otherProduct.id %>">Mark to add</label>
+        <input type="checkbox" id="other-<%= otherProduct.id %>" value="<%= otherProduct.id %>" name="relatedProductsToAdd">
+    </div>
+</div>

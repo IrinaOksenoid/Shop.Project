@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "ES6",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@Shared/*": [
+        "../Shared/*"
+      ]
+    }
+  },
+  "include": [ "./**/*.ts" ],
+  "exclude": [ "node_modules" ]
+}
