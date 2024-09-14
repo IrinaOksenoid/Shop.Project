@@ -1,5 +1,5 @@
 import axios from "axios";
-import { IProduct, IProductFilterPayload, IRelatedProduct } from "@Shared/types";
+import { IProduct, IProductFilterPayload, IRelatedProduct, INewProductPayload } from "@Shared/types";
 import { IProductEditData } from "../types"
 import { API_HOST as host } from "./const";
 //const host = http://${process.env.LOCAL_PATH}:${process.env.LOCAL_PORT}/${process.env.API_PATH};
@@ -165,5 +165,15 @@ export async function getOtherProducts(productId: string): Promise<IProduct[]> {
     } catch (e) {
         console.error(`Error fetching not related products for product with id ${productId}:`, e);
         return [];
+    }
+}
+
+export async function createProduct(productData: INewProductPayload): Promise<IProduct> {
+    try {
+        const { data } = await axios.post<IProduct>(`${host}/products`, productData);
+        return data;
+    } catch (e) {
+        console.error("Error creating product:", e);
+        throw e;
     }
 }

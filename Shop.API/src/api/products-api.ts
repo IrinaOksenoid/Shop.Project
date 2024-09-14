@@ -10,7 +10,7 @@ import {
     IRelatedProductEntity
 } from './../../types';
 import { IComment, IProduct, IImage } from "@Shared/types";
-import { mapProductsEntity, mapCommentsEntity, mapImagesEntity, mapRelatedProductsEntity, mapOtherProductsEntity  } from '../services/mapping';
+import { mapProductsEntity, mapCommentsEntity, mapImagesEntity, mapImageEntity, mapRelatedProductsEntity, mapOtherProductsEntity  } from '../services/mapping';
 import { connection } from '../../index';
 import { enhanceProductsComments, getProductsFilterQuery, enhanceProductsImages } from '../helpers';
 import {
@@ -169,13 +169,37 @@ productsRouter.post('/', async (
             await connection.query<OkPacket>(INSERT_IMAGES_QUERY, [values]);
         }
 
-        
-        res.status(201);
-        res.send(`Product id:${id} has been added!`);
+        // Извлекаем только что добавленный товар из базы данных
+        const [productRows] = await connection.query<IProductEntity[]>(
+            "SELECT * FROM products WHERE product_id = ?",
+            [id]
+        );
+
+        if (!productRows?.[0]) {
+            res.status(404).send("Created product not found");
+            return;
+        }
+
+        // Если были добавлены изображения, извлекаем их тоже
+        const [imageRows] = await connection.query<IImageEntity[]>(
+            "SELECT * FROM images WHERE product_id = ?",
+            [id]
+        );
+
+        // Используем функции маппинга для создания IProduct объекта
+        const newProduct = mapProductsEntity([productRows[0]])[0];
+        newProduct.images = mapImagesEntity(imageRows);
+        newProduct.thumbnail = imageRows.length > 0 
+            ? mapImageEntity(imageRows.find(image => image.main) || imageRows[0])
+            : undefined;
+
+        // Возвращаем новый продукт
+        res.status(201).json(newProduct);
     } catch (e) {
         throwServerError(res, e);
     }
 });
+
 
 productsRouter.post('/add-images', async (
     req: Request<{}, {}, ProductAddImagesPayload>,
@@ -204,51 +228,6 @@ productsRouter.post('/add-images', async (
         throwServerError(res, e);
     }
 });
-
-
-
-// productsRouter.delete('/:id', async (
-//     req: Request<{ id: string }>,
-//     res: Response
-// ) => {
-//     try {
-//         if (!connection) {
-//             res.status(500).send("Database connection not established products-api");
-//             return;
-//         }
-//         const [info] = await connection.query<OkPacket>(
-//             "DELETE FROM products WHERE product_id = ?",
-//             [req.params.id]
-//         );
-
-//         if (info.affectedRows === 0) {
-//             res.status(404);
-//             res.send(`Product with id ${req.params.id} is not found`);
-//             return;
-//         }
-
-//         await connection.query<OkPacket>(
-//             "DELETE FROM images WHERE product_id = ?",
-//             [req.params.id]
-//         );
-
-//         await connection.query<OkPacket>(
-//             "DELETE FROM comments WHERE product_id = ?",
-//             [req.params.id]
-//         );
-
-//         await connection.query<OkPacket>(
-//             "DELETE FROM products WHERE product_id = ?",
-//             [req.params.id]
-//         );
-
-//         res.status(200);
-//         res.send(`Product with id ${req.params.id} has been deleted`);
-//         res.end();
-//     } catch (e) {
-//         throwServerError(res, e);
-//     }
-// });
 
 productsRouter.post('/remove-images', async (
     req: Request<{}, {}, ImagesRemovePayload>,
@@ -389,28 +368,26 @@ productsRouter.get('/:id/related', async (req: Request<{ id: string }>, res: Res
             res.status(500).send("Database connection not established");
             return;
         }
-
-        // Выполнение запроса на получение связанных товаров
         const [relatedProductsRows] = await connection.query<IRelatedProductEntity[]>(
             GET_RELATED_PRODUCTS_QUERY,
             [id]
         );
 
         if (!relatedProductsRows.length) {
-            res.status(200).json([]);  // Возвращаем пустой массив, если нет связанных товаров
+            res.status(200).json([]);  
             return;
         }
 
-        // Использование функции маппинга для преобразования результатов
+        
         const relatedProducts = mapRelatedProductsEntity(relatedProductsRows);
-        //console.log(mapRelatedProductsEntity(relatedProductsRows));  // Добавь это для отладки
+        
         res.status(200).json(relatedProducts);
     } catch (e) {
         throwServerError(res, e);
     }
 });
 
-// Валидация для добавления связей
+
 productsRouter.post('/related/add', [
     body().isArray().withMessage('Body must be an array of product pairs'),
     body('*.product_id').isUUID().withMessage('Product ID must be a valid UUID'),
@@ -429,7 +406,7 @@ productsRouter.post('/related/add', [
             return;
         }
 
-        // Формирование и выполнение запроса для каждой пары продуктов
+        
         for (const pair of pairs) {
             await connection.query(INSERT_RELATED_PRODUCT_QUERY, [pair.product_id, pair.related_product_id]);
         }
@@ -442,7 +419,7 @@ productsRouter.post('/related/add', [
 
 
 productsRouter.delete('/related/remove', async (req: Request, res: Response) => {
-    const productsToRemove = req.body;  // Получаем массив объектов с product_id и related_product_id
+    const productsToRemove = req.body;  
 
     if (!productsToRemove || productsToRemove.length === 0) {
         return res.status(400).send('No related products selected for removal');
@@ -453,9 +430,9 @@ productsRouter.delete('/related/remove', async (req: Request, res: Response) => 
             return res.status(500).send("Database connection not established");
         }
 
-        // Перебираем каждый объект из массива для удаления связей
+        
         for (const { product_id, related_product_id } of productsToRemove) {
-            // Удаляем связь для текущего продукта и связанного продукта
+            
             await connection.query(DELETE_RELATED_PRODUCT_QUERY, [product_id, related_product_id]);
         }
 
@@ -474,26 +451,22 @@ productsRouter.delete('/:id', async (req: Request<{ id: string }>, res: Response
         }
 
         const { id } = req.params;
-
-        // Удаляем все связи перед удалением самого товара
+        
         await connection.query(
             `DELETE FROM related_products WHERE product_id = ? OR related_product_id = ?`,
             [id, id]
         );
 
-        // Удаляем связанные изображения
         await connection.query<OkPacket>(
             "DELETE FROM images WHERE product_id = ?",
             [id]
         );
-
-        // Удаляем связанные комментарии
+        
         await connection.query<OkPacket>(
             "DELETE FROM comments WHERE product_id = ?",
             [id]
         );
 
-        // Теперь можно удалить сам товар
         const [info] = await connection.query<OkPacket>(
             "DELETE FROM products WHERE product_id = ?",
             [id]
@@ -518,10 +491,9 @@ productsRouter.get('/:id/not-related', async (req: Request<{ id: string }>, res:
         }
         const { id } = req.params;
 
-        // Используем переменную GET_OTHER_PRODUCTS_QUERY для выполнения запроса
         const [otherProductsRows] = await connection.query<IProductEntity[]>(
             GET_OTHER_PRODUCTS_QUERY,
-            [id, id]  // Передаем два одинаковых параметра: исключаем сам продукт и его связанные продукты
+            [id, id]  
         );
         const otherProducts = mapOtherProductsEntity(otherProductsRows);
         res.status(200).json(otherProducts);

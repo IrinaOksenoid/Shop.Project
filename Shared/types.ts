@@ -44,3 +44,9 @@ export interface IRelatedProduct {
     description: string;
     price: number;
 }
+
+export interface INewProductPayload {
+    title: string;
+    description: string;
+    price: number;
+}

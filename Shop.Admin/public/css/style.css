@@ -7,8 +7,44 @@ body {
 
 .header {
     padding: 20px 40px;
-    border-bottom: 1px solid #00B1FFFF;
+    border-bottom: 1px solid #00B1FF;
+    display: flex;
+    justify-content: start; /* Выровняем элементы по краям */
+    align-items: center;
 }
+
+.header-links {
+    display: flex;
+    align-items: center;
+}
+
+.add-product-link, .logout-link {
+    color: #ffffff;
+    
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    margin-left: 20px; /* Добавим отступ слева */
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.add-product-link{
+    background-color: #00B1FF;
+}
+.logout-link {
+
+    background-color: #474747;
+}
+
+.add-product-link:hover, .logout-link:hover {
+    background-color: #008FCC; /* Темнее при наведении */
+}
+
+.add-product-link {
+    margin-right: 20px; /* Отступ между ссылкой Add Product и LOGOUT */
+}
+
 
 .logo {
     width: 100px;

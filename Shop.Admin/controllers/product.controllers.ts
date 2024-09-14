@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
-import { getProducts, searchProducts, removeProduct, getProduct, updateProduct, getRelatedProducts, getOtherProducts } from "../models/products.model";
-import { IProductFilterPayload } from "@Shared/types";
+import { getProducts, searchProducts, removeProduct, getProduct, updateProduct, getRelatedProducts, getOtherProducts, createProduct } from "../models/products.model";
+import { IProductFilterPayload, INewProductPayload } from "@Shared/types";
 import { IProductEditData } from "../types"
 import { throwServerError } from "./ helper";
 
@@ -15,7 +15,10 @@ declare module 'express-session' {
 
 export const productsRouter = Router();
 //export const authRouter = Router();
-
+productsRouter.use((req: Request, res: Response, next) => {
+    res.locals.isLoginPage = false;  // Это не страница логина, поэтому false
+    next();
+});
     
 
  productsRouter.get('/', async (req: Request, res: Response) => {
@@ -43,29 +46,6 @@ productsRouter.get('/search', async (
     }
 });
 
-productsRouter.get('/:id', async (req: Request<{ id: string }>, res: Response) => {
-    try {
-        const product = await getProduct(req.params.id);
-        const relatedProducts = await getRelatedProducts(req.params.id);
-        const otherProducts = await getOtherProducts(req.params.id);
-
-        if (product) {
-            res.render("product/product", {
-                item: {
-                ...product,
-                relatedProducts: relatedProducts,
-                otherProducts: otherProducts
-                }
-            });
-        } else {
-            res.render("product/empty-product", {
-                id: req.params.id
-            });
-        }
-    } catch (e) {
-        throwServerError(res, e);
-    }
-});
 
 productsRouter.get('/remove-product/:id', async (
     req: Request<{ id: string }>,
@@ -96,4 +76,58 @@ productsRouter.post('/save/:id', async (
         throwServerError(res, e);
     }
 });
+
+productsRouter.get('/new-product', async (req: Request, res: Response) => {
+    try {
+        res.render("product/new-product");
+    } catch (e) {
+        throwServerError(res, e);
+    }
+});
+
+// Обрабатываем сохранение нового продукта
+productsRouter.post('/new-product', async (req: Request, res: Response) => {
+    try {
+        const { title, description, price } = req.body;
+
+        // Формируем данные для создания продукта
+        const newProductData: INewProductPayload = {
+            title,
+            description,
+            price: Number(price)
+        };
+
+        // Создаем новый продукт через API
+        const createdProduct = await createProduct(newProductData);
+
+        // Редирект на страницу созданного продукта
+        res.redirect(`/${process.env.ADMIN_PATH}/${createdProduct.id}`);
+    } catch (e) {
+        throwServerError(res, e);
+    }
+});
   
+
+productsRouter.get('/:id', async (req: Request<{ id: string }>, res: Response) => {
+    try {
+        const product = await getProduct(req.params.id);
+        const relatedProducts = await getRelatedProducts(req.params.id);
+        const otherProducts = await getOtherProducts(req.params.id);
+
+        if (product) {
+            res.render("product/product", {
+                item: {
+                ...product,
+                relatedProducts: relatedProducts,
+                otherProducts: otherProducts
+                }
+            });
+        } else {
+            res.render("product/empty-product", {
+                id: req.params.id
+            });
+        }
+    } catch (e) {
+        throwServerError(res, e);
+    }
+});

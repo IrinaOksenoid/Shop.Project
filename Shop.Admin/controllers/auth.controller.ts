@@ -24,6 +24,7 @@ export const validateSession = (
 
 authRouter.get("/login", async (req: Request, res: Response) => {
     try {
+        res.locals.isLoginPage = true;
         res.render("login");
     } catch (e) {
         throwServerError(res, e);
