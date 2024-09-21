@@ -1,10 +1,11 @@
 require('dotenv').config();
-import { Express } from "express";
+import express, { Express } from "express";
 import { Connection } from "mysql2/promise";
 import { initDataBase } from "./Server/services/db";
 import { initServer } from "./Server/services/server";
 import ShopAPI from "./Shop.API";
 import ShopAdmin from "./Shop.Admin";
+import path from 'path';
 
 export let server: Express;
 export let connection: Connection | null = null; 
@@ -41,10 +42,13 @@ function initRouter() {
             res.render("login"); // Рендерим страницу логина
         });
 
-        // Пример использования переменной в другом маршруте
-        server.use("/", (_, res) => {
-            isLoginPage = false;  // Возвращаем значение в false для других страниц
-            res.send("React App");
+        const clientBuildPath = path.join(__dirname, "shop-client/build");
+        server.use(express.static(clientBuildPath));
+
+        // Отдача index.html для всех остальных маршрутов
+        server.get("/*", (_, res) => {
+            isLoginPage = false;
+            res.sendFile(path.join(clientBuildPath, "index.html"));
         });
     }
 }

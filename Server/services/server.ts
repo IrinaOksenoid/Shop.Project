@@ -1,5 +1,6 @@
 import express, { Express } from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 dotenv.config();
 
 
@@ -19,6 +20,10 @@ export function initServer(): Express {
     }
 
     const app = express();
+
+    app.use(cors({
+        origin: '*',  // Разрешаем доступ с любого источника, но лучше ограничить в продакшене
+    }));
 
     const jsonMiddleware = express.json();
     app.use(jsonMiddleware);
