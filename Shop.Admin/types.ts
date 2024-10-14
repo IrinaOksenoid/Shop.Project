@@ -6,6 +6,6 @@ export interface IProductEditData {
     newImages?: string;
     commentsToRemove?: string | string[];
     imagesToRemove?: string | string[];
-    relatedProductsToAdd?: string | string[];      // Товары для добавления в "похожие"
-    relatedProductsToRemove?: string | string[];   // Товары для удаления из "похожих"
+    relatedProductsToAdd?: string | string[];      
+    relatedProductsToRemove?: string | string[];   
 }

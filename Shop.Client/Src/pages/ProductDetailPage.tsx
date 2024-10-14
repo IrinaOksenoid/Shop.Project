@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { IProduct } from '@Shared/types'; // Типы из Shared/types
-import { fetchProductById } from '../api/productsApi'; // Запросы к API
+import { IProduct, IRelatedProduct } from '@Shared/types'; 
+import { fetchProductById, fetchRelatedProducts } from '../api/productsApi'; 
 import Loader from '../components/Loader';
+import { Link } from 'react-router-dom';
+
 
 const ProductDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // Получение параметра ID из URL
+  const { id } = useParams<{ id: string }>(); 
   const [product, setProduct] = useState<IProduct | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<IRelatedProduct[]>([]); 
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingRelated, setLoadingRelated] = useState<boolean>(true); 
 
   useEffect(() => {
     const getProduct = async () => {
-      try {
+      if (id) {try {
         setLoading(true);
         const fetchedProduct = await fetchProductById(id);
         setProduct(fetchedProduct);
@@ -20,8 +24,24 @@ const ProductDetailPage: React.FC = () => {
       } finally {
         setLoading(false);
       }
+    }
+    };
+
+    const getRelatedProducts = async () => {
+      if (id) {
+        try {
+          setLoadingRelated(true);
+          const fetchedRelatedProducts = await fetchRelatedProducts(id); 
+          setRelatedProducts(fetchedRelatedProducts);
+        } catch (error) {
+          console.error("Ошибка при загрузке похожих товаров", error);
+        } finally {
+          setLoadingRelated(false);
+        }
+      }
     };
     getProduct();
+    getRelatedProducts();
   }, [id]);
 
   if (loading) {
@@ -61,6 +81,22 @@ const ProductDetailPage: React.FC = () => {
         </ul>
       ) : (
         <p>Комментариев пока нет.</p>
+      )}
+        <h3>Похожие товары</h3>
+      {loadingRelated ? (
+        <Loader />
+      ) : relatedProducts.length > 0 ? (
+        <ul>
+          {relatedProducts.map((relatedProduct) => (
+            <li key={relatedProduct.id}>
+              <Link to={`/products/${relatedProduct.id}`}>
+                {relatedProduct.title} - {relatedProduct.price} ₽
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>Похожие товары не найдены</p>
       )}
     </div>
   );

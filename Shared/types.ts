@@ -22,7 +22,6 @@ export interface IProduct {
     images?: IImage[];
     thumbnail?: IImage;
     relatedProducts?: IRelatedProduct[];
-   // otherProducts?: IProduct[];
 }
 
 export interface IProductFilterPayload {

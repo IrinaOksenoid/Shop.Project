@@ -10,13 +10,9 @@ declare module 'express-session' {
     }
 }
 
-
-//import { authRouter } from "./auth.controller";
-
 export const productsRouter = Router();
-//export const authRouter = Router();
 productsRouter.use((req: Request, res: Response, next) => {
-    res.locals.isLoginPage = false;  // Это не страница логина, поэтому false
+    res.locals.isLoginPage = false;  
     next();
 });
     
@@ -85,22 +81,18 @@ productsRouter.get('/new-product', async (req: Request, res: Response) => {
     }
 });
 
-// Обрабатываем сохранение нового продукта
 productsRouter.post('/new-product', async (req: Request, res: Response) => {
     try {
         const { title, description, price } = req.body;
 
-        // Формируем данные для создания продукта
         const newProductData: INewProductPayload = {
             title,
             description,
             price: Number(price)
         };
 
-        // Создаем новый продукт через API
         const createdProduct = await createProduct(newProductData);
 
-        // Редирект на страницу созданного продукта
         res.redirect(`/${process.env.ADMIN_PATH}/${createdProduct.id}`);
     } catch (e) {
         throwServerError(res, e);

@@ -17,7 +17,6 @@ import {
     INSERT_PRODUCT_QUERY,
     INSERT_IMAGES_QUERY,
     DELETE_IMAGES_QUERY,
-    //INSERT_PRODUCT_IMAGES_QUERY,
     REPLACE_PRODUCT_THUMBNAIL,
     UPDATE_PRODUCT_FIELDS,
     GET_RELATED_PRODUCTS_QUERY,
@@ -29,7 +28,7 @@ import { OkPacket } from 'mysql2';
 import { v4 as uuidv4 } from 'uuid';
 import { throwServerError } from "../../../Shop.Admin/controllers/ helper";
 import { param, body, validationResult } from "express-validator";
-
+import { RowDataPacket } from 'mysql2'; 
 export const productsRouter = Router();
 
 productsRouter.get('/search', async (
@@ -101,6 +100,35 @@ productsRouter.get('/', async (req: Request, res: Response) => {
     }
 });
 
+
+productsRouter.get('/summary', async (req: Request, res: Response) => {
+    if (!connection) {
+      res.status(500).send("Database connection not established products-api");
+      return;
+    }
+    try {
+      const [rows] = await connection.query<RowDataPacket[]>(
+        "SELECT COUNT(*) as totalProducts, SUM(price) as totalPrice FROM products"
+      );
+  
+      if (rows.length === 0) {
+        res.status(404).send('No products found');
+        return;
+      }
+  
+      const summary = rows[0] as { totalProducts: number; totalPrice: number }; // Явное приведение к нужному типу
+      res.json({
+        totalProducts: summary.totalProducts,
+        totalPrice: summary.totalPrice
+      });
+    } catch (e) {
+      console.error('Error fetching product summary:', e);
+      res.status(500).send('Internal server error');
+    }
+  });
+  
+    
+
 productsRouter.get('/:id', async (
     req: Request<{ id: string }>,
     res: Response
@@ -169,7 +197,6 @@ productsRouter.post('/', async (
             await connection.query<OkPacket>(INSERT_IMAGES_QUERY, [values]);
         }
 
-        // Извлекаем только что добавленный товар из базы данных
         const [productRows] = await connection.query<IProductEntity[]>(
             "SELECT * FROM products WHERE product_id = ?",
             [id]
@@ -180,20 +207,17 @@ productsRouter.post('/', async (
             return;
         }
 
-        // Если были добавлены изображения, извлекаем их тоже
         const [imageRows] = await connection.query<IImageEntity[]>(
             "SELECT * FROM images WHERE product_id = ?",
             [id]
         );
 
-        // Используем функции маппинга для создания IProduct объекта
         const newProduct = mapProductsEntity([productRows[0]])[0];
         newProduct.images = mapImagesEntity(imageRows);
         newProduct.thumbnail = imageRows.length > 0 
             ? mapImageEntity(imageRows.find(image => image.main) || imageRows[0])
             : undefined;
 
-        // Возвращаем новый продукт
         res.status(201).json(newProduct);
     } catch (e) {
         throwServerError(res, e);
@@ -501,3 +525,9 @@ productsRouter.get('/:id/not-related', async (req: Request<{ id: string }>, res:
         throwServerError(res, e);
     }
 });
+
+
+
+
+
+  

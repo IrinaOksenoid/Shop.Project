@@ -1,0 +1,28 @@
+header {
+    background-color: #525252; 
+    padding: 20px; 
+  }
+  
+  header nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    line-height: 30px;
+  }
+  
+  header nav ul li {
+    font-weight: 700;
+    font-size: 20px;
+   
+  }
+  
+  header nav ul li a {
+    text-decoration: none; 
+    color: white; 
+    transition: color 0.3s ease; 
+  }
+
+  header nav ul li a:hover {
+    color: rgb(255, 240, 165); 
+  }
+  

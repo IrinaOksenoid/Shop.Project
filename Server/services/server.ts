@@ -22,7 +22,7 @@ export function initServer(): Express {
     const app = express();
 
     app.use(cors({
-        origin: '*',  // Разрешаем доступ с любого источника, но лучше ограничить в продакшене
+        origin: '*',  
     }));
 
     const jsonMiddleware = express.json();

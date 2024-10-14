@@ -10,7 +10,6 @@ import path from 'path';
 export let server: Express;
 export let connection: Connection | null = null; 
 
-// Создаем глобальную переменную
 export let isLoginPage: boolean = false;
 
 async function launchApplication() {
@@ -18,11 +17,9 @@ async function launchApplication() {
         console.error("Failed to connect to the database - index shop");
     }
 
-    // Инициализация сервера и базы данных
     server = initServer();
     connection = await initDataBase(); 
 
-    // Инициализация маршрутов
     initRouter();
 }
 
@@ -36,16 +33,14 @@ function initRouter() {
         const shopAdmin = ShopAdmin();
         server.use("/admin", shopAdmin);
 
-        // Пример использования глобальной переменной на уровне маршрутов
         server.use("/admin/auth/login", (req, res) => {
-            isLoginPage = true;  // Устанавливаем значение переменной при переходе на страницу логина
-            res.render("login"); // Рендерим страницу логина
+            isLoginPage = true;  
+            res.render("login"); 
         });
 
-        const clientBuildPath = path.join(__dirname, "shop-client/build");
+        const clientBuildPath = path.join(__dirname, "Shop.Client/build");
         server.use(express.static(clientBuildPath));
 
-        // Отдача index.html для всех остальных маршрутов
         server.get("/*", (_, res) => {
             isLoginPage = false;
             res.sendFile(path.join(clientBuildPath, "index.html"));

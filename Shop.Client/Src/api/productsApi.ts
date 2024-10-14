@@ -1,10 +1,8 @@
 import axios from 'axios';
-import { IProduct } from '@Shared/types'; // Предполагаем, что у вас уже есть интерфейсы в Shared/types
+import { IProduct, IRelatedProduct } from '@Shared/types'; 
 
-// Базовый URL для API. Можно также использовать переменные окружения.
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
-// Функция для получения списка всех товаров
 export const fetchProducts = async (): Promise<IProduct[]> => {
   try {
     const response = await axios.get<IProduct[]>(`${API_URL}/products`);
@@ -15,7 +13,6 @@ export const fetchProducts = async (): Promise<IProduct[]> => {
   }
 };
 
-// Функция для получения товара по ID
 export const fetchProductById = async (id: string): Promise<IProduct> => {
   try {
     const response = await axios.get<IProduct>(`${API_URL}/products/${id}`);
@@ -26,13 +23,32 @@ export const fetchProductById = async (id: string): Promise<IProduct> => {
   }
 };
 
-// Пример функции для добавления нового товара
 export const createProduct = async (productData: IProduct): Promise<IProduct> => {
   try {
     const response = await axios.post<IProduct>(`${API_URL}/products`, productData);
     return response.data;
   } catch (error) {
     console.error('Ошибка при добавлении товара:', error);
+    throw error;
+  }
+};
+
+export const fetchProductSummary = async (): Promise<{ totalProducts: number, totalPrice: number }> => {
+  try {
+    const response = await axios.get<{ totalProducts: number, totalPrice: number }>(`${API_URL}/products/summary`);
+    return response.data;
+  } catch (error) {
+    console.error('Ошибка при получении данных о товарах:', error);
+    throw error;
+  }
+};
+
+export const fetchRelatedProducts = async (id: string): Promise<IRelatedProduct[]> => {
+  try {
+    const response = await axios.get<IRelatedProduct[]>(`${API_URL}/products/${id}/related`);
+    return response.data;
+  } catch (error) {
+    console.error(`Ошибка при получении похожих товаров для товара с ID ${id}:`, error);
     throw error;
   }
 };

@@ -2,7 +2,6 @@ import axios from "axios";
 import { IProduct, IProductFilterPayload, IRelatedProduct, INewProductPayload } from "@Shared/types";
 import { IProductEditData } from "../types"
 import { API_HOST as host } from "./const";
-//const host = http://${process.env.LOCAL_PATH}:${process.env.LOCAL_PORT}/${process.env.API_PATH};
 
 export async function getProducts(): Promise<IProduct[]> {
     const { data } = await axios.get<IProduct[]>(`${host}/products`);
@@ -106,20 +105,17 @@ export async function updateProduct(
         }
 
         if (formData.relatedProductsToRemove) {
-            // Преобразуем в массив, если это строка
             const relatedProductsIds = Array.isArray(formData.relatedProductsToRemove)
                 ? formData.relatedProductsToRemove
                 : [formData.relatedProductsToRemove];
         
-            // Преобразуем каждый элемент в объект с product_id и related_product_id
             const relatedProductsToRemove = relatedProductsIds.map((relatedProductId: string) => ({
                 product_id: productId,
                 related_product_id: relatedProductId
             }));
         
-            // Отправка запроса на удаление связанных продуктов
             await axios.delete(`${host}/products/related/remove`, {
-                data: relatedProductsToRemove  // Передаем массив объектов
+                data: relatedProductsToRemove  
             });
         }
 

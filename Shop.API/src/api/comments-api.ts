@@ -10,20 +10,6 @@ import { COMMENT_DUPLICATE_QUERY, INSERT_COMMENT_QUERY } from '../services/queri
 import { param, validationResult } from "express-validator";
 const commentsRouter = Router();
 
-//const loadComments = async (): Promise<IComment[]> => {
-//    const rawData = await readFile("src/mock-comments.json", "binary");
-//    return JSON.parse(rawData.toString());
-//}
-
-//const saveComments = async (data: IComment[]): Promise<boolean> => {
-//    try {
-//        await writeFile("src/mock-comments.json", JSON.stringify(data));
-//        return false;
-//    } catch (e) {
-//        return false;
-//    }
-//}
-
 commentsRouter.get("/", async (req: Request, res: Response) => {
     if (!connection) {
         res.status(500).send("Database connection not established - comments-api");

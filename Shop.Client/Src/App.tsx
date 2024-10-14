@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ProductsListPage from './pages/ProductsListPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -11,18 +11,13 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="app">
-        {/* Компонент Header будет виден на всех страницах */}
         <Header />
-
-        {/* Настройка маршрутов */}
-        <Switch>
-          <Route exact path="/" component={HomePage} />
-          <Route path="/products-list" component={ProductsListPage} />
-          <Route path="/products/:id" component={ProductDetailPage} />
-          <Route component={NotFoundPage} />  {/* Обработка несуществующих страниц */}
-        </Switch>
-
-        {/* Компонент Footer будет виден на всех страницах */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/products-list" element={<ProductsListPage />} />
+          <Route path="/products/:id" element={<ProductDetailPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
         <Footer />
       </div>
     </Router>
