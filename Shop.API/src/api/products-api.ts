@@ -26,7 +26,7 @@ import {
 } from '../services/queries';
 import { OkPacket } from 'mysql2';
 import { v4 as uuidv4 } from 'uuid';
-import { throwServerError } from "../../../Shop.Admin/controllers/ helper";
+import { throwServerError } from "../../../Shop.Admin/controllers/helper";
 import { param, body, validationResult } from "express-validator";
 import { RowDataPacket } from 'mysql2'; 
 export const productsRouter = Router();
