@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { getProducts, searchProducts, removeProduct, getProduct, updateProduct, getRelatedProducts, getOtherProducts, createProduct } from "../models/products.model";
 import { IProductFilterPayload, INewProductPayload } from "@Shared/types";
 import { IProductEditData } from "../types"
-import { throwServerError } from "./ helper";
+import { throwServerError } from "./helper";
 
 declare module 'express-session' {
     interface SessionData {

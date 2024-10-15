@@ -1,5 +1,5 @@
 import { NextFunction, Router, Request, Response } from "express";
-import { throwServerError } from "./ helper";
+import { throwServerError } from "./helper";
 import { IAuthRequisites } from "@Shared/types";
 import { verifyRequisites } from "../models/auth.model";
 
